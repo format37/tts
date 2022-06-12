@@ -27,6 +27,6 @@ Text:
 ```
 Hello! Is it a test message? Thank you.
 ```
-[audio.wav](https://github.com/format37/client/audio.wav)
+[audio.wav](https://github.com/format37/tts/raw/main/nemo/client/audio.wav)
 ### Based on
 [NVIDIA NeMo](https://github.com/NVIDIA/NeMo)
