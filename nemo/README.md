@@ -17,11 +17,11 @@ Available values: ["waveglow", "hifigan", "univnet", "griffin-lim", None]
 sudo docker-compose up --build -d
 ```
 ### Using
-[nemo.ipynb](https://github.com/format37/client/nemo.ipynb)
+[nemo.ipynb](https://github.com/format37/tts/blob/main/nemo/client/nemo.ipynb)
 ### Example
 ```
-SPECTROGRAM_GENERATOR=tacotron2
-AUDIO_GENERATOR=waveglow
+SPECTROGRAM_GENERATOR=fastpitch
+AUDIO_GENERATOR=hifigan
 ```
 Text:  
 ```

@@ -18,5 +18,5 @@ services:
     environment:
       - TZ=Europe/Moscow
       - PORT=10005
-      - SPECTROGRAM_GENERATOR=tacotron2
-      - AUDIO_GENERATOR=waveglow
+      - SPECTROGRAM_GENERATOR=fastpitch
+      - AUDIO_GENERATOR=hifigan
