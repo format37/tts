@@ -14,6 +14,7 @@ Available values: ["tacotron2", "fastpitch", "mixertts", "mixerttsx", None]
 Available values: ["waveglow", "hifigan", "univnet", "griffin-lim", None]
 ### Build
 ```
+DOCKER_BUILDKIT=1 docker build -f Dockerfile -t nemo:latest .
 sudo docker-compose up --build -d
 ```
 ### Using
