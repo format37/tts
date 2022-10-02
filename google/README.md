@@ -1,33 +1,13 @@
-# NeMo
-Docker server, receives text over http post request  
-And responses with audio/wav data  
-### Installation
+# Google speech to text docker server
+#### Installation
 ```
 git clone https://github.com/format37/tts.git
-cd tts/nemo/
+cd tts/google
 ```
-### Settings
-It available to define used models in docker-compose.yml:
-* SPECTROGRAM_GENERATOR  
-Available values: ["tacotron2", "fastpitch", "mixertts", "mixerttsx", None]  
-* AUDIO_GENERATOR
-Available values: ["waveglow", "hifigan", "univnet", "griffin-lim", None]
-### Build
+1. Create google cloud service account  
+2. Download json key and put to server/api.json
 ```
-DOCKER_BUILDKIT=1 docker build -f Dockerfile -t nemo:latest .
-sudo docker-compose up --build -d
+sh compose.sh
 ```
-### Using
-[nemo.ipynb](https://github.com/format37/tts/blob/main/nemo/client/nemo.ipynb)
-### Example
-```
-SPECTROGRAM_GENERATOR=fastpitch
-AUDIO_GENERATOR=hifigan
-```
-Text:  
-```
-Hello! Is it a test message? Thank you.
-```
-[audio.wav](https://github.com/format37/tts/raw/main/nemo/client/audio.wav)
-### Based on
-[NVIDIA NeMo](https://github.com/NVIDIA/NeMo)
+#### Using
+Use jupyter notebook to test request to the server
