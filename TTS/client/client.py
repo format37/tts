@@ -1,7 +1,7 @@
 import requests
 import json
 
-def generate_speech(text, language='ru', reference_file='alex.wav'):
+def generate_speech(text, language='ru', reference_file='asmr_0.wav'):
     # API endpoint
     url = 'http://localhost:5000/tts'
     
@@ -31,7 +31,7 @@ def generate_speech(text, language='ru', reference_file='alex.wav'):
 
 if __name__ == "__main__":
     # Example Russian text
-    text = "Привет, как дела?"
+    text = "Так, кажется кому-то пора помыть посуду"
     
     # Generate speech
     generate_speech(text)

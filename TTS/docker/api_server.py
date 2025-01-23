@@ -44,6 +44,7 @@ def generate_speech():
         
         # Generate audio
         wav_bytes = io.BytesIO()
+                
         tts.tts_to_file(
             text=text,
             speaker_wav=source_path,
@@ -66,6 +67,35 @@ def generate_speech():
 @app.route('/test', methods=['GET'])
 def test():
     return {'status': 'ok', 'message': 'TTS API server is running'}, 200
+
+@app.route('/upload_reference', methods=['POST'])
+def upload_reference():
+    try:
+        # Check if file is in request
+        if 'file' not in request.files:
+            return {'error': 'No file provided'}, 400
+        
+        file = request.files['file']
+        filename = request.form.get('filename')
+        
+        # Check if filename was provided
+        if not filename:
+            return {'error': 'No filename provided'}, 400
+            
+        # Ensure the references directory exists
+        references_dir = "./TTS/server/references"
+        os.makedirs(references_dir, exist_ok=True)
+        
+        # Save the file
+        file_path = os.path.join(references_dir, filename)
+        file.save(file_path)
+        
+        logger.info(f"Successfully saved reference file: {filename}")
+        return {'status': 'success', 'message': f'File {filename} uploaded successfully'}, 200
+        
+    except Exception as e:
+        logger.error(f"Error uploading reference file: {str(e)}")
+        return {'error': str(e)}, 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
