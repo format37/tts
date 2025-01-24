@@ -32,8 +32,11 @@ def generate_speech():
             return {'error': 'No text provided'}, 400
         
         text = data['text']
+        logger.info(f"Text: {text}")
         language = data.get('language', 'ru')  # Default to Russian if not specified
+        logger.info(f"Language: {language}")
         reference_file = data.get('reference_file', 'alex.wav')  # Default to alex.wav if not specified
+        logger.info(f"Reference file: {reference_file}")
         
         # Construct the full path to the reference file
         source_path = f"./TTS/server/references/{reference_file}"
