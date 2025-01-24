@@ -1,20 +1,28 @@
 import torch
-from TTS.api import TTS
 from flask import Flask, request, send_file
 import io
-import logging
+import logging as local_logging
 import os
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+local_logging.basicConfig(
+    level=local_logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        local_logging.StreamHandler()  # Log to stdout/stderr for Docker
+    ]
+)
+
+logger = local_logging.getLogger(__name__)
 
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logger.info(f"Using device: {device}")
+
+from TTS.api import TTS
 
 # Init TTS with XTTS v2
 try:
@@ -26,6 +34,7 @@ except Exception as e:
 @app.route('/tts', methods=['POST'])
 def generate_speech():
     try:
+        logger.info("Generate speech endpoint called")
         # Get text and language from request
         data = request.get_json()
         if not data or 'text' not in data:
@@ -69,11 +78,13 @@ def generate_speech():
 
 @app.route('/test', methods=['GET'])
 def test():
+    logger.info(f"Test endpoint called. Using device: {device}")
     return {'status': 'ok', 'message': 'TTS API server is running'}, 200
 
 @app.route('/upload_reference', methods=['POST'])
 def upload_reference():
     try:
+        logger.info("Upload reference endpoint called")
         # Check if file is in request
         if 'file' not in request.files:
             return {'error': 'No file provided'}, 400
@@ -101,4 +112,4 @@ def upload_reference():
         return {'error': str(e)}, 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
