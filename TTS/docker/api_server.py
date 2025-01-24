@@ -45,13 +45,13 @@ def generate_speech():
         language = data.get('language', 'ru')  # Default to Russian if not specified
         logger.info(f"Language: {language}")
         reference_file = data.get('reference_file', 'alex.wav')  # Default to alex.wav if not specified
+        # Construct the full path to the reference file
+        source_path = f"./TTS/server/references/{reference_file}"
         # Check if the reference file exists
         if not os.path.exists(source_path):
             reference_file = 'alex.wav'
+            source_path = f"./TTS/server/references/{reference_file}"
         logger.info(f"Reference file: {reference_file}")
-        
-        # Construct the full path to the reference file
-        source_path = f"./TTS/server/references/{reference_file}"
         
         # Check if the reference file exists
         if not os.path.exists(source_path):
