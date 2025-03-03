@@ -18,6 +18,30 @@ local_logging.basicConfig(
 
 logger = local_logging.getLogger(__name__)
 
+# Fix the PyTorch 2.6+ weights_only issue by adding the required classes to safe globals
+try:
+    import torch.serialization
+    from TTS.tts.configs.xtts_config import XttsConfig
+    from TTS.tts.models.xtts import XttsAudioConfig
+    
+    # Add both classes to safe globals
+    torch.serialization.add_safe_globals([XttsConfig, XttsAudioConfig])
+    logger.info("Applied PyTorch serialization fix for XttsConfig and XttsAudioConfig")
+except Exception as e:
+    logger.warning(f"Failed to apply serialization fix: {str(e)}")
+
+# Monkey patch torch.load to use weights_only=False by default
+original_torch_load = torch.load
+
+def patched_torch_load(f, map_location=None, pickle_module=None, **kwargs):
+    if 'weights_only' not in kwargs:
+        kwargs['weights_only'] = False
+    return original_torch_load(f, map_location=map_location, pickle_module=pickle_module, **kwargs)
+
+# Replace torch.load with our patched version
+torch.load = patched_torch_load
+logger.info("Patched torch.load to use weights_only=False by default")
+
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logger.info(f"Using device: {device}")
@@ -27,6 +51,7 @@ from TTS.api import TTS
 # Init TTS with XTTS v2
 try:
     tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
+    logger.info("Successfully initialized TTS model")
 except Exception as e:
     logger.error(f"Failed to initialize TTS model: {str(e)}")
     raise

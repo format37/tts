@@ -18,6 +18,13 @@ WORKDIR /root/TTS
 
 RUN make install
 
+# Set environment variable to automatically accept the license
+ENV COQUI_TOS_AGREED=1
+
+# Create updated patch file to fix the weights_only issue in PyTorch 2.6+
+COPY add_safe_globals.py /root/add_safe_globals.py
+
+# Copy the modified API server
 COPY api_server.py /root/TTS/TTS/server/api_server.py
 
 ENTRYPOINT ["python3"]
