@@ -1,6 +1,7 @@
 import torch
 from flask import Flask, request, send_file
 import io
+import re
 import logging as local_logging
 import os
 
@@ -56,6 +57,59 @@ except Exception as e:
     logger.error(f"Failed to initialize TTS model: {str(e)}")
     raise
 
+def split_long_sentence(sentence, max_chars=250):
+    """Split a sentence that's too long at natural break points."""
+    if len(sentence) <= max_chars:
+        return [sentence]
+
+    chunks = []
+    # Split at em-dash, semicolon, comma+space — in that priority
+    delimiters = [' — ', '; ', ', ']
+
+    remaining = sentence
+    while len(remaining) > max_chars:
+        best_pos = -1
+        best_delim = ''
+        for delim in delimiters:
+            # Find the last occurrence of delimiter before max_chars
+            pos = remaining.rfind(delim, 0, max_chars)
+            if pos > best_pos:
+                best_pos = pos
+                best_delim = delim
+
+        if best_pos > 0:
+            chunks.append(remaining[:best_pos + len(best_delim)].strip())
+            remaining = remaining[best_pos + len(best_delim):].strip()
+        else:
+            # No good break point found, force split at max_chars on a space
+            pos = remaining.rfind(' ', 0, max_chars)
+            if pos > 0:
+                chunks.append(remaining[:pos].strip())
+                remaining = remaining[pos:].strip()
+            else:
+                # No space found, just split hard
+                chunks.append(remaining[:max_chars].strip())
+                remaining = remaining[max_chars:].strip()
+
+    if remaining:
+        chunks.append(remaining.strip())
+
+    return chunks
+
+
+def preprocess_text(text):
+    """Split text into chunks safe for XTTS (under 400 tokens each)."""
+    # Split into sentences first (by period, !, ?)
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    result = []
+    for sentence in sentences:
+        sentence = sentence.strip()
+        if not sentence:
+            continue
+        result.extend(split_long_sentence(sentence))
+    return ' '.join(result)
+
+
 @app.route('/tts', methods=['POST'])
 def generate_speech():
     try:
@@ -64,9 +118,9 @@ def generate_speech():
         data = request.get_json()
         if not data or 'text' not in data:
             return {'error': 'No text provided'}, 400
-        
+
         text = data['text']
-        logger.info(f"Text: {text}")
+        logger.info(f"Text length: {len(text)} chars")
         language = data.get('language', 'ru')  # Default to Russian if not specified
         logger.info(f"Language: {language}")
         reference_file = data.get('reference_file', 'alex.wav')  # Default to alex.wav if not specified
@@ -77,21 +131,25 @@ def generate_speech():
             reference_file = 'alex.wav'
             source_path = f"./TTS/server/references/{reference_file}"
         logger.info(f"Reference file: {reference_file}")
-        
+
         # Check if the reference file exists
         if not os.path.exists(source_path):
             return {'error': f'Reference file {reference_file} not found'}, 404
-        
+
+        # Preprocess text to split long sentences
+        text = preprocess_text(text)
+        logger.info(f"Preprocessed text length: {len(text)} chars")
+
         # Generate audio
         wav_bytes = io.BytesIO()
-                
+
         tts.tts_to_file(
             text=text,
             speaker_wav=source_path,
             language=language,
             file_path=wav_bytes
         )
-        
+
         wav_bytes.seek(0)
         return send_file(
             wav_bytes,

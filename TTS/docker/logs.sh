@@ -1,1 +1,1 @@
-sudo docker logs -f tts-server
+docker logs -f tts-server

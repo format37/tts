@@ -9,7 +9,7 @@ docker rm $CONTAINER_NAME >/dev/null 2>&1
 mkdir -p ./share
 
 # Run new container with name
-docker run -d -p 5000:5000 --gpus '"device=1"' \
+docker run -d -p 5000:5000 --gpus '"device=0"' \
     --name $CONTAINER_NAME \
     -v "$(pwd)/share:/root/.local/share" \
     -v "$(pwd)/references:/root/TTS/TTS/server/references" \
